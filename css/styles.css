@@ -1,15 +1,48 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f8f9fa;
-  margin: 0;
-  padding: 20px;
+:root{
+  --bg:#0b1726;
+  --ink:#0e1724;
+  --text:#253046;
+  --muted:#6b7280;
+  --surface:#ffffff;
+  --brand:#00437a;
+  --brand-600:#0a5aa4;
+  --border:#e5e7eb;
 }
 
-.question-box {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  max-width: 600px;
-  margin: auto;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;background:#f3f6fb;color:var(--text)}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.small{font-size:13px}
+
+.site-header{background:var(--bg);color:#fff}
+.site-header .subtitle{opacity:.8;margin-top:6px}
+
+.site-footer{background:var(--bg);color:#cbd5e1}
+.site-footer a{color:#e2e8f0}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 16px 20px;margin:16px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card-title{margin:4px 0 12px 0;color:var(--ink);font-size:18px}
+
+.form-row{display:flex;gap:12px;align-items:center;margin:10px 0}
+.form-row label{min-width:260px}
+.form-row input, .form-row select, .form-row textarea{
+  border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;width:100%;
 }
+
+.mode-switch{display:flex;gap:16px}
+.mode-switch input{margin-right:6px}
+
+.action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-600)}
+.btn:hover{filter:brightness(.98)}
+
+.preview-surface{
+  background:#fff;border:1px dashed var(--border);border-radius:12px;padding:16px;min-height:120px;overflow:auto
+}
+.muted{color:var(--muted)}
+
+.code-output{width:100%;height:260px;background:#0b1220;color:#d1e7ff;border-radius:10px;border:1px solid #1e293b;padding:12px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;font-size:12.5px;line-height:1.5}
+
+.help-text{color:var(--muted);margin-top:8px}
