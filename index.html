@@ -1,23 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>NUS Application Quiz Simulator</title>
-  <link rel="stylesheet" href="./css/styles.css">
+  <meta charset="utf-8" />
+  <title>NUS Qualtrics EOS Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="./css/styles.css" rel="stylesheet" />
 </head>
 <body>
+  <header class="site-header">
+    <div class="container">
+      <h1>NUS Qualtrics End-of-Survey Message Generator</h1>
+      <p class="subtitle">Create and maintain EOS snippets. Links are centralized in <code>js/resources.js</code>.</p>
+    </div>
+  </header>
 
-  <div id="quizContainer" class="question-box"></div>
-  <div id="pdfContent"></div>
-  <button id="downloadPdfBtn" style="display:none;">📄 Download This Page as PDF</button>
+  <main class="container">
+    <!-- Mode -->
+    <section class="card">
+      <h2 class="card-title">Mode</h2>
+      <div class="mode-switch">
+        <label><input type="radio" name="mode" value="generate" checked /> Generate</label>
+        <label><input type="radio" name="mode" value="update" /> Update template links…</label>
+      </div>
+    </section>
 
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Generator -->
+    <section class="card" id="generatorCard">
+      <h2 class="card-title">Generate snippet</h2>
 
-  <!-- Survey JS -->
-  <script src="./js/surveyFlow.js"></script>
-  <script src="./js/qualifications.js"></script>
+      <div class="form-row">
+        <label for="qualification">Template</label>
+        <select id="qualification"></select>
+      </div>
+
+      <div class="form-row" id="intlRow" hidden>
+        <label for="intlSelect">International sub-qualification</label>
+        <select id="intlSelect"></select>
+      </div>
+
+      <div class="form-row">
+        <label for="timeline">Application timeline (shown in card)</label>
+        <input id="timeline" type="text" placeholder="e.g., 17 December 2025 to 23 February 2026" />
+      </div>
+
+      <div class="action-row">
+        <button id="generateBtn" class="btn primary">Generate</button>
+        <button id="resetBtn" class="btn">Reset</button>
+      </div>
+    </section>
+
+    <!-- Update links -->
+    <section class="card" id="updateCard" hidden>
+      <h2 class="card-title">Update template links</h2>
+
+      <div class="form-row">
+        <label for="updateQualification">Template</label>
+        <select id="updateQualification"></select>
+      </div>
+
+      <div class="form-row" id="updateIntlRow" hidden>
+        <label for="updateIntlSelect">International sub-qualification</label>
+        <select id="updateIntlSelect"></select>
+      </div>
+
+      <div id="linksEditor"></div>
+
+      <div class="action-row">
+        <button id="applyLocalBtn" class="btn">Apply locally</button>
+        <button id="openIssueBtn" class="btn primary">Open GitHub Issue → Auto-PR</button>
+        <button id="resetEditorBtn" class="btn">Reset editor</button>
+      </div>
+
+      <p class="help-text">
+        “Open GitHub Issue” creates a pre-filled Issue in
+        <code>polyelig/qual-qual</code>. A GitHub Action validates, commits to a branch,
+        and opens a Pull Request updating <code>js/resources.js</code>.
+      </p>
+    </section>
+
+    <!-- Preview -->
+    <section class="card">
+      <h2 class="card-title">Live preview</h2>
+      <div id="preview" class="preview-surface">
+        <div class="muted">Generate or apply locally to see a preview here.</div>
+      </div>
+    </section>
+
+    <!-- Code output -->
+    <section class="card">
+      <h2 class="card-title">Generated HTML (copy into Qualtrics)</h2>
+      <textarea id="output" class="code-output" spellcheck="false" placeholder="Your code will appear here…"></textarea>
+      <div class="action-row">
+        <button id="copyBtn" class="btn">Copy</button>
+        <button id="downloadBtn" class="btn">Download .html</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container small">
+      <div>© NUS OAM • EOS Generator</div>
+      <div>Repo: <a href="https://github.com/polyelig/qual-qual" target="_blank" rel="noopener noreferrer">polyelig/qual-qual</a></div>
+    </div>
+  </footer>
+
+  <script src="./js/resources.js"></script>
+  <script src="./js/templates.js"></script>
   <script src="./js/main.js"></script>
-
 </body>
 </html>
