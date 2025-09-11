@@ -180,7 +180,7 @@ function resourcesSection(titleHtml, itemsHtml){
 /* ----- Local templates ----- */
 function buildPoly(periodText){
   const head = wrapperOpen();
-  const card = buildCard(periodText, "for the Polytechnic Diploma from Singapore qualification is");
+  const card = buildCard(periodText, "for the Polytechnic Diploma from Singapore Qualification is");
   const login = loginBlockLocal(false);
   const resItems = 
       li("Admission Requirements", RES.links.polyAdmission) +
@@ -263,7 +263,7 @@ function buildInternational(subId, periodText){
   const period = esc(periodText || (item ? item.displayPeriod : ""));
   const head = wrapperOpen();
   const qualName = item ? item.name : "the International Qualification";
-  const card = buildCard(period, `the ${qualName} is`);
+  const card = buildCard(period, `the ${qualName} Qualification is`);
 
   const login = `
 <hr class="section-divider" />
@@ -271,7 +271,7 @@ function buildInternational(subId, periodText){
 <p style="font-size:15px; margin-bottom:12px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
-to proceed with your application using the ${qualName}.</p>
+to proceed with your application using the ${qualName} qualification.</p>
 <p style="font-size:15px; margin-bottom:24px;">📌 Please check if you fulfil the
 <a href="${RES.links.mtlRequirements}" rel="noopener noreferrer" target="_blank">Mother Tongue Language (MTL) requirements</a>.</p>
 
@@ -279,7 +279,7 @@ to proceed with your application using the ${qualName}.</p>
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
-with your email address to proceed with your application using the ${qualName}.</p>`;
+with your email address to proceed with your application using the ${qualName} qualification.</p>`;
 
   // Resources: admission for sub-qual + conditional standardised/english + shared
   let items = "";
@@ -304,14 +304,14 @@ window.buildTemplate = function({ slug, subId, periodText }){
     throw new Error("resources not loaded");
   }
   switch (slug) {
-    case "polySingapore": return buildPoly(periodText || "17 December 2025 to 4 February 2026");
-    case "nusHigh":       return buildNusHigh(periodText || "17 December 2025 to 2 January 2026");
-    case "aLevel":        return buildALevelLocal(periodText || "Day of Results Release to 19 March 2026");
-    case "ibLocal":       return buildIbLocal(periodText || "17 December 2025 to 23 February 2026");
-    case "transfer":      return buildTransfer(periodText || "3 February 2026 to 23 February 2026");
+    case "polySingapore": return buildPoly(periodText || "from 17 December 2025 to 4 February 2026");
+    case "nusHigh":       return buildNusHigh(periodText || "from 17 December 2025 to 2 January 2026");
+    case "aLevel":        return buildALevelLocal(periodText || "from Day of Results Release to 19 March 2026");
+    case "ibLocal":       return buildIbLocal(periodText || "from 17 December 2025 to 23 February 2026");
+    case "transfer":      return buildTransfer(periodText || "from 3 February 2026 to 23 February 2026");
     case "international":
       if (!subId) throw new Error("Select an international sub-qualification");
-      return buildInternational(subId, periodText || "3 December 2025 to 23 February 2026");
+      return buildInternational(subId, periodText || "from 3 December 2025 to 23 February 2026");
     default:
       throw new Error("Unknown template slug: " + esc(slug));
   }
