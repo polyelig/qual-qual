@@ -111,6 +111,9 @@ select,input[type="text"]{
   background:#fff;
 }
 
+/* Show when preview is in edit mode */
+.preview-editing #previewFrame { outline: 2px dashed #94a3b8; }
+
 /* Code */
 .code-pane{display:flex; flex-direction:column}
 .code-toolbar{
@@ -141,3 +144,4 @@ select,input[type="text"]{
   .page{grid-template-columns:1fr}
   .controls{position:static}
 }
+
