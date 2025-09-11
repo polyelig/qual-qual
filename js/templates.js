@@ -183,7 +183,7 @@ function buildPoly(periodText){
   const card = buildCard(periodText, "for the Polytechnic Diploma from Singapore Qualification is");
   const login = loginBlockLocal(false);
   const resItems = 
-      li("Admission Requirements", RES.links.polyAdmission) +
+      li("Polytechnic Diploma from Singapore Admission Requirements", RES.links.polyAdmission) +
       sharedLinksFromKeys(window.TEMPLATES.localResources.polySingapore, RES.links);
   const res = resourcesSection(window.TEMPLATES.headings.polySingapore, resItems);
   return withPdfAddendum(head + card + login + res + wrapperClose());
