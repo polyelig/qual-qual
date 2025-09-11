@@ -169,7 +169,7 @@ function mtlNote(){
 
 function resourcesSection(titleHtml, itemsHtml){
   return `
-<div class="page-break">&nbsp;</div>
+<div class="page-break"></div>
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🎓 <strong>${titleHtml}</strong></h2>
 <ul style="padding-left:20px; font-size:15px; margin-bottom:0; margin-left:40px;">
