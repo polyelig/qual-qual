@@ -125,7 +125,7 @@
     } catch (e) {
       console.error(e);
       htmlOut.value = `<!-- Error building template: ${e && e.message ? e.message : e} -->`;
-      writePreview('<p style="padding:16px;color:#b00020;">Error building template. See console.</p>');
+      writePreview('<p style="padding:16px;color:#b00020;">Error building template. Select International qualification.</p>');
     }
   }
 
@@ -173,3 +173,4 @@
   loadInternationalOptions();          // fills international sub-quals
   resetAll();                          // initial render
 })();
+
