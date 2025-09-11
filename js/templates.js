@@ -9,9 +9,9 @@
 /* ---------- Template metadata ---------- */
 window.TEMPLATES = {
   localList: [
+    { slug: "aLevel",        name: "Singapore-Cambridge GCE A-Level (Local)" },
     { slug: "polySingapore", name: "Polytechnic Diploma from Singapore (Local)" },
     { slug: "nusHigh",       name: "NUS High School Diploma (Local)" },
-    { slug: "aLevel",        name: "Singapore-Cambridge GCE A-Level (Local)" },
     { slug: "ibLocal",       name: "International Baccalaureate (IB) (Local)" },
     { slug: "transfer",      name: "Transfer Applicants (Category)" },
     { slug: "international", name: "International (Pick sub-qualification…)" }
