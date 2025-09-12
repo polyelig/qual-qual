@@ -237,7 +237,7 @@ function buildTransfer(periodText){
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
 </div>`;
-  // No MTL note for Transfer (per your rule)
+  // No MTL note for Transfer
   const login = `
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🔎 <strong>Singapore Citizens / Singapore Permanent Residents / FIN holders</strong></h2>
@@ -270,12 +270,8 @@ function buildInternational(subId, periodText){
   const qualName = item ? item.name : "the International Qualification";
   const card = buildCard(period, `the ${qualName} Qualification is`);
 
-  // Derive the Admission Requirements URL for the MTL note from the item.resources
-  let admissionHref = "";
-  if (item && Array.isArray(item.resources)) {
-    const ar = item.resources.find(r => (r.label || "").toLowerCase().includes("admission requirements"));
-    admissionHref = ar ? ar.url : "";
-  }
+  // FIXED MTL link for all international quals (per your request)
+  const mtlHrefFixed = "https://nus.edu.sg/oam/admissions/singapore-citizens-sprs-with-international-qualifications";
 
   const login = `
 <hr class="section-divider" />
@@ -284,7 +280,7 @@ function buildInternational(subId, periodText){
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
 to proceed with your application using the ${qualName} qualification.</p>
-${mtlNoteWithHref(admissionHref)}
+${mtlNoteWithHref(mtlHrefFixed)}
 
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
