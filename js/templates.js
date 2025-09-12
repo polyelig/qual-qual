@@ -57,6 +57,13 @@ function sharedLinksFromKeys(keys, links){
   return keys.map(k => li(map[k]?.label, links[k])).join("");
 }
 
+/* MTL note that accepts a specific Admission Requirements href */
+function mtlNoteWithHref(href){
+  if (!href) return "";
+  return `<p style="font-size:15px; margin-bottom:24px;">📌 Please check if you fulfil the
+  <a href="${href}" rel="noopener noreferrer" target="_blank">Mother Tongue Language (MTL) requirements</a>.</p>`;
+}
+
 /* PDF addendum: warning + date inside the pdfContent, button+CSS+scripts appended */
 function withPdfAddendum(innerHtml, pdfFilename){
   const filename = pdfFilename || "NUS_Application_Guide.pdf";
@@ -156,15 +163,11 @@ function loginBlockLocal(showProspective){
   with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a> to proceed with your application.
 </p>
 <hr class="section-divider" />
-<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
+<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
   Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
   with your email address to proceed with your application.
 </p>`;
-}
-
-function mtlNote(){
-  return `<p style="font-size:15px; margin-bottom:24px;">📌 Please check if you fulfil the <a href="${RES.links.mtlRequirements}" rel="noopener noreferrer" target="_blank">Mother Tongue Language (MTL) requirements</a>.</p>`;
 }
 
 function resourcesSection(titleHtml, itemsHtml){
@@ -182,7 +185,7 @@ function buildPoly(periodText){
   const head = wrapperOpen();
   const card = buildCard(periodText, "for the Polytechnic Diploma from Singapore Qualification is");
   const login = loginBlockLocal(false);
-  const resItems = 
+  const resItems =
       li("Polytechnic Diploma from Singapore Admission Requirements", RES.links.polyAdmission) +
       sharedLinksFromKeys(window.TEMPLATES.localResources.polySingapore, RES.links);
   const res = resourcesSection(window.TEMPLATES.headings.polySingapore, resItems);
@@ -192,7 +195,8 @@ function buildPoly(periodText){
 function buildNusHigh(periodText){
   const head = wrapperOpen();
   const card = buildCard(periodText, "the NUS High School Diploma Qualification is");
-  const login = loginBlockLocal(true) + mtlNote();
+  const mtlHref = RES.links.nusHighAdmission; // link MTL note to NUS High admissions
+  const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
       li("NUS High School Diploma Admission Requirements", RES.links.nusHighAdmission) +
       sharedLinksFromKeys(window.TEMPLATES.localResources.nusHigh, RES.links);
@@ -203,7 +207,8 @@ function buildNusHigh(periodText){
 function buildALevelLocal(periodText){
   const head = wrapperOpen();
   const card = buildCard(periodText, "the Singapore-Cambridge GCE A-Level Qualification is");
-  const login = loginBlockLocal(true) + mtlNote();
+  const mtlHref = RES.links.aLevelAdmission; // link MTL note to A-Level admissions
+  const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
       li("Singapore-Cambridge GCE A-Level Admission Requirements", RES.links.aLevelAdmission) +
       sharedLinksFromKeys(window.TEMPLATES.localResources.aLevel, RES.links);
@@ -214,7 +219,8 @@ function buildALevelLocal(periodText){
 function buildIbLocal(periodText){
   const head = wrapperOpen();
   const card = buildCard(periodText, "the International Baccalaureate (IB) Qualification is");
-  const login = loginBlockLocal(true) + mtlNote();
+  const mtlHref = RES.links.ibAdmission; // link MTL note to IB admissions
+  const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
       li("International Baccalaureate (IB) Diploma Admission Requirements", RES.links.ibAdmission) +
       sharedLinksFromKeys(window.TEMPLATES.localResources.ibLocal, RES.links);
@@ -231,6 +237,7 @@ function buildTransfer(periodText){
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
 </div>`;
+  // No MTL note for Transfer (per your rule)
   const login = `
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🔎 <strong>Singapore Citizens / Singapore Permanent Residents / FIN holders</strong></h2>
@@ -239,11 +246,9 @@ As you have indicated that you are currently studying / have enrolled in / have 
 please log in to the <a href="${RES.links.applicantPortal}" target="_blank">Applicant Portal</a> with your
 <a href="${RES.links.singpassIndividuals || RES.links.singpassSupport}" rel="noopener noreferrer" target="_blank">Singpass</a>
 to proceed with your application as a Transfer candidate.</p>
-<p style="font-size:15px; margin-bottom:24px;">📌 Please check if you fulfil the
-<a href="${RES.links.mtlRequirements}" rel="noopener noreferrer" target="_blank">Mother Tongue Language (MTL) requirements</a>.</p>
 
 <hr class="section-divider" />
-<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
+<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:10px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your email address to proceed with your application as a Transfer candidate.</p>`;
@@ -265,6 +270,13 @@ function buildInternational(subId, periodText){
   const qualName = item ? item.name : "the International Qualification";
   const card = buildCard(period, `the ${qualName} Qualification is`);
 
+  // Derive the Admission Requirements URL for the MTL note from the item.resources
+  let admissionHref = "";
+  if (item && Array.isArray(item.resources)) {
+    const ar = item.resources.find(r => (r.label || "").toLowerCase().includes("admission requirements"));
+    admissionHref = ar ? ar.url : "";
+  }
+
   const login = `
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🖥️ <strong>Singapore Citizens / Singapore Permanent Residents / FIN holders</strong></h2>
@@ -272,11 +284,10 @@ function buildInternational(subId, periodText){
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
 to proceed with your application using the ${qualName} qualification.</p>
-<p style="font-size:15px; margin-bottom:24px;">📌 Please check if you fulfil the
-<a href="${RES.links.mtlRequirements}" rel="noopener noreferrer" target="_blank">Mother Tongue Language (MTL) requirements</a>.</p>
+${mtlNoteWithHref(admissionHref)}
 
 <hr class="section-divider" />
-<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
+<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your email address to proceed with your application using the ${qualName} qualification.</p>`;
