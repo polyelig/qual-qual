@@ -80,8 +80,10 @@ window.RESOURCES = {
   var links = {
     // core
     applicantPortal: shared.applicantPortal || "",
-    singpassSupport: shared.singpassSupport || shared.singpassIndividuals || "",
+    singpassSupport: shared.singpassSupport || "",
+    singpassIndividuals: shared.singpassIndividuals || "",   // <-- now exposed too
     finExplainer: shared.finFaq || "",
+    finFaq: shared.finFaq || "",                              // <-- alias for safety
 
     // shared resources
     importantDates: shared.importantDates || "",
@@ -95,7 +97,7 @@ window.RESOURCES = {
 
     transferEligibilityChart: shared.transferEligibilityChart || "",
 
-    // default MTL page (used by several local templates)
+    // MTL page (fixed for international; locals pass their own admissions link to the MTL note builder)
     mtlRequirements: "https://www.nus.edu.sg/oam/admissions/singapore-citizens-sprs-with-international-qualifications",
 
     // local admission pages
@@ -118,9 +120,15 @@ window.RESOURCES = {
     };
   });
 
+  // Optional meta used by templates (cycle title, etc.)
+  var meta = {
+    cycleTitle: "AY2026/2027"
+  };
+
   // Expose as window.RES
   window.RES = {
     links: links,
-    internationalQualifications: internationalQualifications
+    internationalQualifications: internationalQualifications,
+    meta: meta
   };
 })();
