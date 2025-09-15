@@ -49,6 +49,21 @@ function li(label, url){
   return `<li style="margin-bottom: 6px;"><a href="${url}" rel="noopener noreferrer" target="_blank">${label}</a></li>`;
 }
 
+/* NEW: avoid "Other High School Qualifications Qualification" */
+function endsWithQualificationWord(name){
+  return /\bqualification(s)?$/i.test((name || "").trim());
+}
+function formatQualDisplay(name){
+  // For headings/cards: append "Qualification" only if missing
+  const n = (name || "").trim();
+  return endsWithQualificationWord(n) ? n : `${n} Qualification`;
+}
+function sentenceQualDisplay(name){
+  // For sentences like "using the …": append lowercase "qualification" only if missing
+  const n = (name || "").trim();
+  return endsWithQualificationWord(n) ? n : `${n} qualification`;
+}
+
 function sharedLinksFromKeys(keys, links){
   const map = {
     importantDates:        { label: "Important Dates" },
@@ -275,10 +290,14 @@ function buildInternational(subId, periodText){
   const item = (RES.internationalQualifications || []).find(x => x.id === subId);
   const period = esc(periodText || (item ? item.displayPeriod : ""));
   const head = wrapperOpen();
-  const qualName = item ? item.name : "International";
-  const card = buildCard(period, `the ${qualName} Qualification is`);
 
-  // Fixed MTL link for all international quals
+  const qualName = item ? item.name : "International";
+  const displayName  = formatQualDisplay(qualName);     // e.g., "Other High School Qualifications"
+  const sentenceName = sentenceQualDisplay(qualName);    // e.g., "Other High School Qualifications"
+
+  // Card (note: no duplicated "Qualification")
+  const card = buildCard(period, `the ${displayName} is`);
+
   const mtlHrefFixed = "https://nus.edu.sg/oam/admissions/singapore-citizens-sprs-with-international-qualifications";
 
   const login = `
@@ -287,22 +306,20 @@ function buildInternational(subId, periodText){
 <p style="font-size:15px; margin-bottom:12px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
-to proceed with your application using the ${qualName} qualification.</p>
+to proceed with your application using the ${sentenceName}.</p>
 ${mtlNoteWithHref(mtlHrefFixed)}
 
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
-with your email address to proceed with your application using the ${qualName} qualification.</p>`;
+with your email address to proceed with your application using the ${sentenceName}.</p>`;
 
   // Resources: admission for sub-qual + conditional standardised/english + shared
   let items = "";
   if (item && Array.isArray(item.resources) && item.resources.length){
     const first = item.resources[0];
     items += li(`${qualName} Admission Requirements`, first.url);
-  } else if (item && item.admissionUrl){
-    items += li(`${qualName} Admission Requirements`, item.admissionUrl);
   }
   if (item && item.standardisedTest === "Yes") {
     items += li("Standardised Test", RES.links.standardisedTestPdf);
@@ -312,11 +329,7 @@ with your email address to proceed with your application using the ${qualName} q
   }
   items += sharedLinksFromKeys(["importantDates","applicationGuides","programmePrerequisites","updateApplicantInfo"], RES.links);
 
-  const title =
-    (typeof window.TEMPLATES.headings.international === "function")
-      ? window.TEMPLATES.headings.international(qualName)
-      : `Application Resources for the ${qualName} Qualification`;
-
+  const title = `Application Resources for the ${displayName}`;
   const res = resourcesSection(title, items);
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
