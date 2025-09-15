@@ -15,17 +15,21 @@
   const htmlOut      = document.getElementById('htmlOutput');
   const iframe       = document.getElementById('previewFrame');
 
-  // Ensure button text
   if (buildBtn) buildBtn.textContent = 'Generate code';
 
-  let isEditing = false;   // preview edit mode
-  let isDirty   = false;   // user changed preview
+  let isEditing = false;          // preview edit mode
+  let isDirty   = false;          // user changed preview
   let inputHandlerAttached = false;
   let previewInputHandler = null;
+  let debounceTimer = null;
+
+  // track last selected values to allow revert on cancel
+  let lastSlug = null;
+  let lastSubId = null;
 
   // ---------- Build the main qualification selector from TEMPLATES ----------
   function populateMainQualificationSelector() {
-    if (!window.TEMPLATES || !Array.isArray(window.TEMPLATES.localList)) return;
+    if (!window.TEMPLATES || !Array.isArray(window.TEMPLATES.localList) || !qSelect) return;
     qSelect.innerHTML = '';
 
     const locals = window.TEMPLATES.localList.filter(i => i.slug !== 'international');
@@ -50,6 +54,7 @@
 
   // ---------- Populate international sub-qualifications ----------
   function loadInternationalOptions() {
+    if (!subSelect) return;
     if (!window.RES || !Array.isArray(RES.internationalQualifications)) {
       console.warn('International list not found: check resources.js -> window.RES.internationalQualifications');
       subSelect.innerHTML = '';
@@ -76,6 +81,7 @@
 
   // ---------- Enable/disable the intl section ----------
   function syncInternationalState() {
+    if (!qSelect || !subSelect || !intlWrap) return;
     const isIntl = qSelect.value === 'international';
     subSelect.disabled = !isIntl;
     intlWrap.setAttribute('aria-disabled', String(!isIntl));
@@ -111,7 +117,7 @@
               document.addEventListener('click', function(e){
                 var a = e.target.closest && e.target.closest('a');
                 if (!a) return;
-                if (host.getAttribute('contenteditable') === 'true') {
+                if (host && host.getAttribute('contenteditable') === 'true') {
                   if (!(e.metaKey || e.ctrlKey)) { e.preventDefault(); }
                 }
               }, true);
@@ -121,8 +127,8 @@
       </html>
     `);
     doc.close();
-    updatePdfButtonState();
 
+    updatePdfButtonState();
 
     // If we’re editing, attach input listener now
     if (isEditing && !inputHandlerAttached) {
@@ -138,7 +144,6 @@
   }
 
   // ---------- Sync preview edits back to the textarea (debounced) ----------
-  let debounceTimer = null;
   function attachPreviewInputListener() {
     const doc = iframe.contentDocument || iframe.contentWindow.document;
     const host = doc && doc.getElementById('editableHost');
@@ -148,7 +153,7 @@
       isDirty = true;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        htmlOut.value = getEditableHtml();
+        if (htmlOut) htmlOut.value = getEditableHtml();
       }, 200);
     };
     host.addEventListener('input', previewInputHandler);
@@ -160,11 +165,11 @@
     const host = doc && doc.getElementById('editableHost');
     if (!host) return;
     if (previewInputHandler) {
-       host.removeEventListener('input', previewInputHandler);
-       previewInputHandler = null;
-     }
-      inputHandlerAttached = false;
+      host.removeEventListener('input', previewInputHandler);
+      previewInputHandler = null;
     }
+    inputHandlerAttached = false;
+  }
 
   // ---------- Toggle edit mode ----------
   function setEditMode(flag) {
@@ -177,62 +182,60 @@
 
     if (isEditing) {
       if (!inputHandlerAttached) attachPreviewInputListener();
-      toggleEdit.textContent = 'Stop editing';
+      if (toggleEdit) toggleEdit.textContent = 'Stop editing';
     } else {
       detachPreviewInputListener();
-      toggleEdit.textContent = 'Edit preview';
-
+      if (toggleEdit) toggleEdit.textContent = 'Edit preview';
     }
- updatePdfButtonState();
+    updatePdfButtonState();
   }
 
-// Disable/enable the PDF download button in the iframe while editing
-function updatePdfButtonState() {
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  if (!doc) return;
+  // Disable/enable the PDF download button in the iframe while editing
+  function updatePdfButtonState() {
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    if (!doc) return;
 
-  // Capture-phase blocker to stop html2pdf handlers when editing
-  if (!doc.__pdfClickBlocker) {
-    doc.__pdfClickBlocker = function (e) {
-      if (!isEditing) return;
-      const t = e.target && e.target.closest ? e.target.closest('#downloadPdfBtn') : null;
-      if (t) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+    // Capture-phase blocker to stop html2pdf handlers when editing
+    if (!doc.__pdfClickBlocker) {
+      doc.__pdfClickBlocker = function (e) {
+        if (!isEditing) return;
+        const t = e.target && e.target.closest ? e.target.closest('#downloadPdfBtn') : null;
+        if (t) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      };
+      doc.addEventListener('click', doc.__pdfClickBlocker, true);
+    }
+
+    // Style/disable any download buttons present
+    const btns = doc.querySelectorAll('#downloadPdfBtn');
+    btns.forEach(btn => {
+      if (isEditing) {
+        btn.setAttribute('disabled', 'true');
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Disabled while editing the preview';
+      } else {
+        btn.removeAttribute('disabled');
+        btn.style.opacity = '';
+        btn.style.cursor = '';
+        btn.removeAttribute('title');
       }
-    };
-    doc.addEventListener('click', doc.__pdfClickBlocker, true);
+    });
   }
-
-  // Style/disable any download buttons present
-  const btns = doc.querySelectorAll('#downloadPdfBtn');
-  btns.forEach(btn => {
-    if (isEditing) {
-      btn.setAttribute('disabled', 'true');
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-      btn.title = 'Disabled while editing the preview';
-    } else {
-      btn.removeAttribute('disabled');
-      btn.style.opacity = '';
-      btn.style.cursor = '';
-      btn.removeAttribute('title');
-    }
-  });
-}
-
 
   // ---------- Build (Generate) ----------
   function build() {
-    const slug = qSelect.value;
-    const subId = subSelect.value || null;
-    const periodText = (periodInput.value || '').trim();
+    const slug = qSelect ? qSelect.value : '';
+    const subId = subSelect ? (subSelect.value || null) : null;
+    const periodText = (periodInput && periodInput.value || '').trim();
 
-    // If there are unsaved direct edits and the user changes template, warn once
-    if (isDirty && !isEditing) {
-      // (We only warn when switching templates while not actively editing.)
-      // You can add a confirm() if you want a blocking prompt.
-      console.warn('You have unsaved preview edits that differ from the last generated output.');
+    // If editing & dirty, confirm before regenerating (overwrites edits)
+    if (isEditing && isDirty) {
+      const ok = confirm('Generating new code will overwrite your edits in the preview. Continue?');
+      if (!ok) return;
+      isDirty = false;
     }
 
     try {
@@ -240,19 +243,19 @@ function updatePdfButtonState() {
         throw new Error('templates.js not loaded or window.buildTemplate missing');
       }
       const html = window.buildTemplate({ slug, subId, periodText });
-      htmlOut.value = html;
-      // Re-render preview but preserve current edit mode
+      if (htmlOut) htmlOut.value = html;
       writePreview(html);
       isDirty = false; // fresh build, not yet edited
     } catch (e) {
       console.error(e);
-      htmlOut.value = `<!-- Error building template: ${e && e.message ? e.message : e} -->`;
+      if (htmlOut) htmlOut.value = `<!-- Error building template: ${e && e.message ? e.message : e} -->`;
       writePreview('<p style="padding:16px;color:#b00020;">Error building template. See console.</p>');
     }
   }
 
   // ---------- Copy to clipboard ----------
   async function copyHtml() {
+    if (!copyBtn || !htmlOut) return;
     try {
       await navigator.clipboard.writeText(htmlOut.value);
       copyBtn.textContent = 'Copied!';
@@ -270,35 +273,61 @@ function updatePdfButtonState() {
     const firstLocal = (window.TEMPLATES && Array.isArray(window.TEMPLATES.localList))
       ? window.TEMPLATES.localList.find(i => i.slug !== 'international')
       : null;
-    qSelect.value = firstLocal ? firstLocal.slug : 'polySingapore';
-    periodInput.value = '';
-    subSelect.value = '';
+
+    if (qSelect) qSelect.value = firstLocal ? firstLocal.slug : 'polySingapore';
+    if (periodInput) periodInput.value = '';
+    if (subSelect) subSelect.value = '';
     syncInternationalState();
     setEditMode(false);
+    lastSlug = qSelect ? qSelect.value : null;
+    lastSubId = subSelect ? subSelect.value : null;
     build();
   }
 
   // ---------- Events ----------
-  qSelect.addEventListener('change', () => {
-    if (isEditing && isDirty) {
-      // optional: confirm before losing edits
-      if (!confirm('Switching template will overwrite your edits in the preview. Continue?')) {
-        // revert selection change by rebuilding current preview
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        if (doc) writePreview(htmlOut.value);
-        return;
+  if (qSelect) {
+    qSelect.addEventListener('change', () => {
+      const newSlug = qSelect.value;
+      if (isEditing && isDirty) {
+        const ok = confirm('Switching template will overwrite your edits in the preview. Continue?');
+        if (!ok) {
+          // revert selection
+          qSelect.value = lastSlug || qSelect.value;
+          // refresh preview from current htmlOut
+          writePreview(htmlOut ? htmlOut.value : '');
+          return;
+        }
       }
-    }
-    isDirty = false;
-    syncInternationalState();
-    build();
-  });
-  subSelect.addEventListener('change', build);
-  periodInput.addEventListener('input', build);
-  resetBtn.addEventListener('click', resetAll);
-  buildBtn.addEventListener('click', build);
-  copyBtn.addEventListener('click', copyHtml);
-  toggleEdit.addEventListener('click', () => setEditMode(!isEditing));
+      isDirty = false;
+      lastSlug = newSlug;
+      syncInternationalState();
+      build();
+    });
+  }
+
+  if (subSelect) {
+    subSelect.addEventListener('change', () => {
+      const newSub = subSelect.value || '';
+      if (isEditing && isDirty) {
+        const ok = confirm('Changing the sub-qualification will overwrite your edits in the preview. Continue?');
+        if (!ok) {
+          // revert selection
+          subSelect.value = lastSubId || '';
+          writePreview(htmlOut ? htmlOut.value : '');
+          return;
+        }
+      }
+      isDirty = false;
+      lastSubId = newSub;
+      build();
+    });
+  }
+
+  if (periodInput) periodInput.addEventListener('input', build);
+  if (resetBtn) resetBtn.addEventListener('click', resetAll);
+  if (buildBtn) buildBtn.addEventListener('click', build);
+  if (copyBtn) copyBtn.addEventListener('click', copyHtml);
+  if (toggleEdit) toggleEdit.addEventListener('click', () => setEditMode(!isEditing));
 
   // ---------- Init ----------
   populateMainQualificationSelector();
