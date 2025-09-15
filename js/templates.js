@@ -31,12 +31,20 @@ window.TEMPLATES = {
     aLevel:        "Application Resources for the Singapore-Cambridge GCE A-Level Qualification",
     ibLocal:       "Application Resources for the International Baccalaureate (IB) Qualification",
     transfer:      "Application Resources for Transfer Applicants",
-    international: "Application Resources for the ${qualName} Qualification"
+    international(name){ return 'Application Resources for the ${name} Qualification'; }
   }
 };
 
 /* ---------- Utilities ---------- */
-function esc(s){ return String(s == null ? "" : s); }
+function esc(s){ 
+s = String(s == null ? "" : s);
+  return s
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
 
 function li(label, url){
   if(!url) return "";
@@ -267,7 +275,7 @@ function buildInternational(subId, periodText){
   const item = (RES.internationalQualifications || []).find(x => x.id === subId);
   const period = esc(periodText || (item ? item.displayPeriod : ""));
   const head = wrapperOpen();
-  const qualName = item ? item.name : "the International Qualification";
+  const qualName = item ? item.name : "International";
   const card = buildCard(period, `the ${qualName} Qualification is`);
 
   // FIXED MTL link for all international quals (per your request)
@@ -303,7 +311,7 @@ with your email address to proceed with your application using the ${qualName} q
   items += sharedLinksFromKeys(["importantDates","applicationGuides","programmePrerequisites","updateApplicantInfo"], RES.links);
 
   const title = `Application Resources for the ${qualName} Qualification`;
-  const res = resourcesSection(window.TEMPLATES.headings.international, items);
+  const res = resourcesSection(title, items);
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
