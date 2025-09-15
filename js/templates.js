@@ -1,9 +1,6 @@
 /* templates.js — builds EOS snippets + includes PDF download section
    Expects:
      - window.RES.links and window.RES.internationalQualifications (from resources.js)
-   Exposes:
-     - window.TEMPLATES (meta)
-     - window.buildTemplate({ slug, subId, periodText })
 */
 
 /* ---------- Template metadata ---------- */
@@ -31,13 +28,14 @@ window.TEMPLATES = {
     aLevel:        "Application Resources for the Singapore-Cambridge GCE A-Level Qualification",
     ibLocal:       "Application Resources for the International Baccalaureate (IB) Qualification",
     transfer:      "Application Resources for Transfer Applicants",
-    international(name){ return 'Application Resources for the ${name} Qualification'; }
+    // dynamic builder for international heading
+    international(name){ return `Application Resources for the ${name} Qualification`; }
   }
 };
 
 /* ---------- Utilities ---------- */
-function esc(s){ 
-s = String(s == null ? "" : s);
+function esc(s){
+  s = String(s == null ? "" : s);
   return s
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
@@ -81,7 +79,7 @@ function withPdfAddendum(innerHtml, pdfFilename){
 <span style="font-size:13px;">Date: \${date://CurrentDate/PT}</span>`;
   const cssAndScripts = `
 <!-- Download button OUTSIDE pdfContent so it is not captured in PDF -->
-<button id="downloadPdfBtn" style="
+<button id="downloadPdfBtn" aria-label="Download this page as PDF" style="
   background-color: #00437a;
   color: white;
   padding: 10px 20px;
@@ -121,10 +119,12 @@ function withPdfAddendum(innerHtml, pdfFilename){
 }
 
 /* ---------- Builders for each template ---------- */
+const CYCLE_TITLE = (window.RES && RES.meta && RES.meta.cycleTitle) || "AY2026/2027";
+
 function buildCard(periodText, headingText){
   return `
 <div style="max-width:100%; margin:16px 0; padding:16px; border-radius:12px; background-color:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center;">
-  <h2 style="margin:0; font-size:18px;">📅 AY2026/2027 Application Period for</h2>
+  <h2 style="margin:0; font-size:18px;">📅 ${esc(CYCLE_TITLE)} Application Period for</h2>
   <p style="font-size:15px; margin:8px 0 0;">${headingText}<br />
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
@@ -240,7 +240,7 @@ function buildTransfer(periodText){
   const head = wrapperOpen();
   const card = `
 <div style="max-width:100%; margin:16px 0; padding:16px; border-radius:12px; background-color:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center;">
-  <h2 style="margin:0; font-size:18px;">📅 AY2026/2027 Semester 1 Application Period for</h2>
+  <h2 style="margin:0; font-size:18px;">📅 ${esc(CYCLE_TITLE)} Semester 1 Application Period for</h2>
   <p style="font-size:15px;">Transfer Candidates is<br />
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
@@ -248,7 +248,7 @@ function buildTransfer(periodText){
   // No MTL note for Transfer
   const login = `
 <hr class="section-divider" />
-<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🔎 <strong>Singapore Citizens / Singapore Permanent Residents / FIN holders</strong></h2>
+<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🔎 <strong>Singapore Citizens/ Singapore Permanent Residents / FIN holders</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
 As you have indicated that you are currently studying / have enrolled in / have graduated from a tertiary institution,
 please log in to the <a href="${RES.links.applicantPortal}" target="_blank">Applicant Portal</a> with your
@@ -278,12 +278,12 @@ function buildInternational(subId, periodText){
   const qualName = item ? item.name : "International";
   const card = buildCard(period, `the ${qualName} Qualification is`);
 
-  // FIXED MTL link for all international quals (per your request)
+  // Fixed MTL link for all international quals
   const mtlHrefFixed = "https://nus.edu.sg/oam/admissions/singapore-citizens-sprs-with-international-qualifications";
 
   const login = `
 <hr class="section-divider" />
-<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🖥️ <strong>Singapore Citizens / Singapore Permanent Residents / FIN holders</strong></h2>
+<h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🖥️ <strong>Singapore Citizens/ Singapore Permanent Residents / FIN holders</strong></h2>
 <p style="font-size:15px; margin-bottom:12px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
@@ -299,8 +299,10 @@ with your email address to proceed with your application using the ${qualName} q
   // Resources: admission for sub-qual + conditional standardised/english + shared
   let items = "";
   if (item && Array.isArray(item.resources) && item.resources.length){
-       const first = item.resources[0];
-       items += li(`${qualName} Admission Requirements`, first.url);
+    const first = item.resources[0];
+    items += li(`${qualName} Admission Requirements`, first.url);
+  } else if (item && item.admissionUrl){
+    items += li(`${qualName} Admission Requirements`, item.admissionUrl);
   }
   if (item && item.standardisedTest === "Yes") {
     items += li("Standardised Test", RES.links.standardisedTestPdf);
@@ -310,7 +312,11 @@ with your email address to proceed with your application using the ${qualName} q
   }
   items += sharedLinksFromKeys(["importantDates","applicationGuides","programmePrerequisites","updateApplicantInfo"], RES.links);
 
-  const title = `Application Resources for the ${qualName} Qualification`;
+  const title =
+    (typeof window.TEMPLATES.headings.international === "function")
+      ? window.TEMPLATES.headings.international(qualName)
+      : `Application Resources for the ${qualName} Qualification`;
+
   const res = resourcesSection(title, items);
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
@@ -319,6 +325,9 @@ with your email address to proceed with your application using the ${qualName} q
 window.buildTemplate = function({ slug, subId, periodText }){
   if (!window.RES || !RES.links) {
     throw new Error("resources not loaded");
+  }
+  if (slug === "international" && !Array.isArray(RES.internationalQualifications)) {
+    throw new Error("International list not loaded. Check resources.js (RES.internationalQualifications).");
   }
   switch (slug) {
     case "polySingapore": return buildPoly(periodText || "from 17 December 2025 to 4 February 2026");
