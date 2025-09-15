@@ -29,9 +29,9 @@ window.TEMPLATES = {
     polySingapore: "Application Resources for the Polytechnic Diploma from Singapore Qualification",
     nusHigh:       "Application Resources for the NUS High School Diploma Qualification",
     aLevel:        "Application Resources for the Singapore-Cambridge GCE A-Level Qualification",
-    ibLocal:       "Application Resources for the International Baccalaureate Qualification",
+    ibLocal:       "Application Resources for the International Baccalaureate (IB) Qualification",
     transfer:      "Application Resources for Transfer Applicants",
-    international: "Application Resources for the ${} Qualification"
+    international: "Application Resources for the ${qualName} Qualification"
   }
 };
 
