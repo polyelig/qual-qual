@@ -16,8 +16,8 @@ window.RESOURCES = {
     "importantDates": "https://nus.edu.sg/oam/admissions/important-dates",
     "indicativeGradeProfile": "https://nus.edu.sg/oam/admissions/indicative-grade-profile",
     "applicationGuides": "https://nus.edu.sg/oam/admissions/application-guides-sample-forms",
-    "programmePrerequisites": "https://nus.edu.sg/oam/admissions/before-you-apply",
-    "updateApplicantInfo": "https://nus.edu.sg/oam/admissions/after-you-apply",
+    "programmePrerequisites": "https://nus.edu.sg/oam/admissions/programme-prerequisites",
+    "updateApplicantInfo": "https://nus.edu.sg/oam/admissions/using-the-applicant-portal",
 
     "standardisedTestPdf": "https://nus.edu.sg/oam/docs/default-source/default-document-library/standardised_test.pdf",
     "englishRequirementPdf": "https://www.nus.edu.sg/oam/docs/default-source/default-document-library/english-test-scores.pdf",
