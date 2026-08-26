@@ -134,12 +134,12 @@ function withPdfAddendum(innerHtml, pdfFilename){
 }
 
 /* ---------- Builders for each template ---------- */
-const CYCLE_TITLE = (window.RES && RES.meta && RES.meta.cycleTitle) || "AY2026/2027";
+const DEFAULT_CYCLE_TITLE = (window.RES && RES.meta && RES.meta.cycleTitle) || "AY2026/2027";
 
-function buildCard(periodText, headingText){
+function buildCard(periodText, headingText, academicYear){
   return `
 <div style="max-width:100%; margin:16px 0; padding:16px; border-radius:12px; background-color:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center;">
-  <h2 style="margin:0; font-size:18px;">📅 ${esc(CYCLE_TITLE)} Application Period for</h2>
+  <h2 style="margin:0; font-size:18px;">📅 ${esc(academicYear || DEFAULT_CYCLE_TITLE)} Application Period for</h2>
   <p style="font-size:15px; margin:8px 0 0;">${headingText}<br />
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
@@ -204,9 +204,9 @@ function resourcesSection(titleHtml, itemsHtml){
 }
 
 /* ----- Local templates ----- */
-function buildPoly(periodText){
+function buildPoly(periodText, academicYear){
   const head = wrapperOpen();
-  const card = buildCard(periodText, "for the Polytechnic Diploma from Singapore Qualification is");
+  const card = buildCard(periodText, "the Polytechnic Diploma from Singapore Qualification is", academicYear);
   const login = loginBlockLocal(false);
   const resItems =
       li("Polytechnic Diploma from Singapore Admission Requirements", RES.links.polyAdmission) +
@@ -215,9 +215,9 @@ function buildPoly(periodText){
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
-function buildNusHigh(periodText){
+function buildNusHigh(periodText, academicYear){
   const head = wrapperOpen();
-  const card = buildCard(periodText, "the NUS High School Diploma Qualification is");
+  const card = buildCard(periodText, "the NUS High School Diploma Qualification is", academicYear);
   const mtlHref = RES.links.nusHighAdmission; // link MTL note to NUS High admissions
   const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
@@ -227,9 +227,9 @@ function buildNusHigh(periodText){
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
-function buildALevelLocal(periodText){
+function buildALevelLocal(periodText, academicYear){
   const head = wrapperOpen();
-  const card = buildCard(periodText, "the Singapore-Cambridge GCE A-Level Qualification is");
+  const card = buildCard(periodText, "the Singapore-Cambridge GCE A-Level Qualification is", academicYear);
   const mtlHref = RES.links.aLevelAdmission; // link MTL note to A-Level admissions
   const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
@@ -239,9 +239,9 @@ function buildALevelLocal(periodText){
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
-function buildIbLocal(periodText){
+function buildIbLocal(periodText, academicYear){
   const head = wrapperOpen();
-  const card = buildCard(periodText, "the International Baccalaureate (IB) Qualification is");
+  const card = buildCard(periodText, "the International Baccalaureate (IB) Qualification is", academicYear);
   const mtlHref = RES.links.ibAdmission; // link MTL note to IB admissions
   const login = loginBlockLocal(true) + mtlNoteWithHref(mtlHref);
   const resItems =
@@ -251,11 +251,11 @@ function buildIbLocal(periodText){
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
-function buildTransfer(periodText){
+function buildTransfer(periodText, academicYear){
   const head = wrapperOpen();
   const card = `
 <div style="max-width:100%; margin:16px 0; padding:16px; border-radius:12px; background-color:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); text-align:center;">
-  <h2 style="margin:0; font-size:18px;">📅 ${esc(CYCLE_TITLE)} Semester 1 Application Period for</h2>
+  <h2 style="margin:0; font-size:18px;">📅 ${esc(academicYear || DEFAULT_CYCLE_TITLE)} Semester 1 Application Period for</h2>
   <p style="font-size:15px;">Transfer Candidates is<br />
   <strong>${esc(periodText)}</strong></p>
   <p style="font-size:13px; margin:8px 0 0;">Please refer to the <a href="${RES.links.importantDates}" rel="noopener noreferrer" target="_blank">OAM website</a> for the latest dates and any updates.</p>
@@ -286,7 +286,7 @@ with your email address to proceed with your application as a Transfer candidate
 }
 
 /* ----- International template ----- */
-function buildInternational(subId, periodText){
+function buildInternational(subId, periodText, academicYear){
   const item = (RES.internationalQualifications || []).find(x => x.id === subId);
   const period = esc(periodText || (item ? item.displayPeriod : ""));
   const head = wrapperOpen();
@@ -294,9 +294,12 @@ function buildInternational(subId, periodText){
   const qualName = item ? item.name : "International";
   const displayName  = formatQualDisplay(qualName);     // e.g., "Other High School Qualifications"
   const sentenceName = sentenceQualDisplay(qualName);    // e.g., "Other High School Qualifications"
+  const qualNameHtml = esc(qualName);
+  const displayNameHtml = esc(displayName);
+  const sentenceNameHtml = esc(sentenceName);
 
   // Card (note: no duplicated "Qualification")
-  const card = buildCard(period, `the ${displayName} is`);
+  const card = buildCard(period, `the ${displayNameHtml} is`, academicYear);
 
   const mtlHrefFixed = "https://nus.edu.sg/oam/admissions/singapore-citizens-sprs-with-international-qualifications";
 
@@ -306,20 +309,20 @@ function buildInternational(subId, periodText){
 <p style="font-size:15px; margin-bottom:12px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
 with your <a href="${RES.links.singpassSupport || RES.links.singpassIndividuals}" rel="noopener noreferrer" target="_blank">Singpass</a>
-to proceed with your application using the ${sentenceName}.</p>
+to proceed with your application using the ${sentenceNameHtml}.</p>
 ${mtlNoteWithHref(mtlHrefFixed)}
 
 <hr class="section-divider" />
 <h2 style="font-size:18px; font-weight:normal; margin:0 0 10px;">🌏 <strong>Foreigners (without <a href="${RES.links.finExplainer || RES.links.finFaq}" rel="noopener noreferrer" target="_blank">FIN</a>)</strong></h2>
 <p style="font-size:15px; margin-bottom:24px;">
 Please log in to the <a href="${RES.links.applicantPortal}" rel="noopener noreferrer" target="_blank">Applicant Portal</a>
-with your email address to proceed with your application using the ${sentenceName}.</p>`;
+with your email address to proceed with your application using the ${sentenceNameHtml}.</p>`;
 
   // Resources: admission for sub-qual + conditional standardised/english + shared
   let items = "";
   if (item && Array.isArray(item.resources) && item.resources.length){
     const first = item.resources[0];
-    items += li(`${qualName} Admission Requirements`, first.url);
+    items += li(`${qualNameHtml} Admission Requirements`, first.url);
   }
   if (item && item.standardisedTest === "Yes") {
     items += li("Standardised Test", RES.links.standardisedTestPdf);
@@ -329,28 +332,29 @@ with your email address to proceed with your application using the ${sentenceNam
   }
   items += sharedLinksFromKeys(["importantDates","applicationGuides","programmePrerequisites","updateApplicantInfo"], RES.links);
 
-  const title = `Application Resources for the ${displayName}`;
+  const title = `Application Resources for the ${displayNameHtml}`;
   const res = resourcesSection(title, items);
   return withPdfAddendum(head + card + login + res + wrapperClose());
 }
 
 /* ---------- Public builder ---------- */
-window.buildTemplate = function({ slug, subId, periodText }){
+window.buildTemplate = function({ slug, subId, academicYear, periodText }){
   if (!window.RES || !RES.links) {
     throw new Error("resources not loaded");
   }
   if (slug === "international" && !Array.isArray(RES.internationalQualifications)) {
     throw new Error("International list not loaded. Check resources.js (RES.internationalQualifications).");
   }
+  const cycleTitle = String(academicYear || DEFAULT_CYCLE_TITLE).trim() || DEFAULT_CYCLE_TITLE;
   switch (slug) {
-    case "polySingapore": return buildPoly(periodText || "from 17 December 2025 to 4 February 2026");
-    case "nusHigh":       return buildNusHigh(periodText || "from 17 December 2025 to 2 January 2026");
-    case "aLevel":        return buildALevelLocal(periodText || "from Day of Results Release to 19 March 2026");
-    case "ibLocal":       return buildIbLocal(periodText || "from 17 December 2025 to 23 February 2026");
-    case "transfer":      return buildTransfer(periodText || "from 3 February 2026 to 23 February 2026");
+    case "polySingapore": return buildPoly(periodText || "from 17 December 2025 to 4 February 2026", cycleTitle);
+    case "nusHigh":       return buildNusHigh(periodText || "from 17 December 2025 to 2 January 2026", cycleTitle);
+    case "aLevel":        return buildALevelLocal(periodText || "from Day of Results Release to 19 March 2026", cycleTitle);
+    case "ibLocal":       return buildIbLocal(periodText || "from 17 December 2025 to 23 February 2026", cycleTitle);
+    case "transfer":      return buildTransfer(periodText || "from 3 February 2026 to 23 February 2026", cycleTitle);
     case "international":
       if (!subId) throw new Error("Select an international sub-qualification");
-      return buildInternational(subId, periodText || "from 3 December 2025 to 23 February 2026");
+      return buildInternational(subId, periodText || "from 3 December 2025 to 23 February 2026", cycleTitle);
     default:
       throw new Error("Unknown template slug: " + esc(slug));
   }
