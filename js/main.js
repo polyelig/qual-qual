@@ -1,12 +1,13 @@
 // main.js
 // Expects window.RES (with RES.internationalQualifications)
 // Expects window.TEMPLATES (with localList, etc.)
-// Expects window.buildTemplate({ slug, subId, periodText })
+// Expects window.buildTemplate({ slug, subId, academicYear, periodText })
 
 (function () {
   const qSelect      = document.getElementById('qualification');
   const intlWrap     = document.getElementById('intlWrap');
   const subSelect    = document.getElementById('subQualification');
+  const academicYearInput = document.getElementById('academicYear');
   const periodInput  = document.getElementById('periodText');
   const resetBtn     = document.getElementById('resetBtn');
   const buildBtn     = document.getElementById('buildBtn');
@@ -229,6 +230,7 @@
   function build() {
     const slug = qSelect ? qSelect.value : '';
     const subId = subSelect ? (subSelect.value || null) : null;
+    const academicYear = (academicYearInput && academicYearInput.value || '').trim();
     const periodText = (periodInput && periodInput.value || '').trim();
 
     // If editing & dirty, confirm before regenerating (overwrites edits)
@@ -242,7 +244,7 @@
       if (typeof window.buildTemplate !== 'function') {
         throw new Error('templates.js not loaded or window.buildTemplate missing');
       }
-      const html = window.buildTemplate({ slug, subId, periodText });
+      const html = window.buildTemplate({ slug, subId, academicYear, periodText });
       if (htmlOut) htmlOut.value = html;
       writePreview(html);
       isDirty = false; // fresh build, not yet edited
@@ -275,6 +277,8 @@
       : null;
 
     if (qSelect) qSelect.value = firstLocal ? firstLocal.slug : 'polySingapore';
+    if (academicYearInput) academicYearInput.value =
+      (window.RES && RES.meta && RES.meta.cycleTitle) || 'AY2026/2027';
     if (periodInput) periodInput.value = '';
     if (subSelect) subSelect.value = '';
     syncInternationalState();
@@ -323,6 +327,7 @@
     });
   }
 
+  if (academicYearInput) academicYearInput.addEventListener('input', build);
   if (periodInput) periodInput.addEventListener('input', build);
   if (resetBtn) resetBtn.addEventListener('click', resetAll);
   if (buildBtn) buildBtn.addEventListener('click', build);
